@@ -94,17 +94,64 @@ def asso_net_img(input_shape,model_path, num_classes = None, mode = "train"):
 
         
 # Define the rad_classification_model function
-def rad_classification_model(input_shape, num_classes=5, channels=1, weight_decay=5e-4):
-    input_shape_3D = input_shape.copy()
-    input_shape_3D.append(channels)   #[w, h, d, channel] = [256x256x64x1]
-    radar_input   = Input(input_shape_3D,name='Radar_RAD')
-    feat = darknet_body_3D(radar_input, weight_decay=weight_decay)
-    fv = layers.Flatten()(feat)
-    embedding = layers.Dense(units=128,  name='rad_feat')(fv)
-    output = layers.Dense(units=num_classes, activation='softmax', name='Radclassification')(embedding)
+#def rad_classification_model(input_shape, num_classes=5, channels=1, weight_decay=5e-4):
+#    input_shape_3D = input_shape.copy()
+#    input_shape_3D.append(channels)   #[w, h, d, channel] = [256x256x64x1]
+#    radar_input   = Input(input_shape_3D,name='Radar_RAD')
+#    feat = darknet_body_3D(radar_input, weight_decay=weight_decay)
+#    fv = layers.Flatten()(feat)
+#    embedding = layers.Dense(units=128,  name='rad_feat')(fv)
+#    output = layers.Dense(units=num_classes, activation='softmax', name='Radclassification')(embedding)
+#    
+#    model = Model(inputs=[radar_input], outputs=[output], name='RADClassificationNet')
+#    return model  
     
-    model = Model(inputs=[radar_input], outputs=[output], name='RADClassificationNet')
-    return model  
+def build_complex_cnn(input_shape, num_classes=5, channels=1, weight_decay=1e-1, dropout_rate=0.5):
+    # input_shape_3D = input_shape.copy()
+    # input_shape_3D.append(channels)   #[w, h, d, channel] = [256x256x64x1]
+    input_shape_3D = list(input_shape) + [channels]
+    # Input layers for real and imaginary parts
+    input_real = Input(input_shape_3D,name='Radar_real')
+    input_imag = Input(input_shape_3D,name='Radar_imag')
+
+    # Convolutional layers for real part
+    x_real = Conv3D(16, (3, 3, 3), activation='relu', kernel_regularizer=regularizers.l2(weight_decay))(input_real)
+    x_real = MaxPooling3D(pool_size=(2, 2, 2))(x_real)
+    x_real = Conv3D(8, (3, 3, 3), activation='relu', kernel_regularizer=regularizers.l2(weight_decay))(x_real)
+    x_real = MaxPooling3D(pool_size=(2, 2, 2))(x_real)
+    x_real = Conv3D(8, (3, 3, 3), activation='relu', kernel_regularizer=regularizers.l2(weight_decay))(x_real)
+    x_real = MaxPooling3D(pool_size=(2, 2, 2))(x_real)
+
+    # Convolutional layers for imaginary part
+    x_imag = Conv3D(16, (3, 3, 3), activation='relu', kernel_regularizer=regularizers.l2(weight_decay))(input_imag)
+    x_imag = MaxPooling3D(pool_size=(2, 2, 2))(x_imag)
+    x_imag = Conv3D(8, (3, 3, 3), activation='relu', kernel_regularizer=regularizers.l2(weight_decay))(x_imag)
+    x_imag = MaxPooling3D(pool_size=(2, 2, 2))(x_imag)
+    x_imag = Conv3D(8, (3, 3, 3), activation='relu', kernel_regularizer=regularizers.l2(weight_decay))(x_imag)
+    x_imag = MaxPooling3D(pool_size=(2, 2, 2))(x_imag)
+
+    # Flatten the outputs
+    x_real = Flatten()(x_real)
+    x_imag = Flatten()(x_imag)
+
+    # Concatenate real and imaginary parts
+    x = Concatenate()([x_real, x_imag])
+
+    # Fully-connected layers
+    x = Dense(units=128,  name='rad_feat', activation='relu')(x)
+    x = Dropout(rate=dropout_rate)(x)
+    output = Dense(num_classes, activation='softmax')(x)
+    
+
+    # # Create separate models for real and imaginary parts
+    # model_real = Model(inputs=input_real, outputs=output)
+    # model_imag = Model(inputs=input_imag, outputs=output)
+
+    # Combine the models into a single model
+    model = Model(inputs=[input_real, input_imag], outputs=output)
+
+    return model
+
 
 # Define the img_classification_model function
 def img_classification_model(input_shape, num_classes=5, channels=1, weight_decay=5e-4):

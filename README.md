@@ -94,7 +94,7 @@ python Calibration_based_on_Common_Features/calibration.py
 
 ---
 
-<h1 align="center">🚀 Demo Video: 3D Radar and Camera Co-Calibration</h1>
+<h1 align="center">🚀 3D Radar and Camera Co-Calibration</h1>
 
 <p align="center">
   <b>Paper:</b>

@@ -111,7 +111,13 @@ python Calibration_based_on_Common_Features/calibration.py
 </p>
 
 ---
+## 🎯 I. Abstract
+Advances in autonomous driving are inseparable from sensor fusion. Heterogeneous sensors are widely used for sensor fusion due to their complementary properties, with radar and camera being the most equipped sensors. Intrinsic and extrinsic calibration are essential steps in sensor fusion. The extrinsic calibration, independent of the sensor's own parameters, and performed after the sensors are installed, greatly determines the accuracy of sensor fusion. Many target-based methods require cumbersome operating procedures and well-designed experimental conditions, making them extremely challenging. To this end, we propose a flexible, easy-to-reproduce and accurate method for extrinsic calibration of 3D radar and camera. The proposed method does not require a specially designed calibration environment, and instead places a single corner reflector (CR) on the ground to iteratively collect radar and camera data simultaneously using Robot Operating System (ROS), and obtain radar-camera point correspondences based on their timestamps, and then use these point correspondences as input to solve the perspective-n-point (PnP) problem, and finally get the extrinsic calibration matrix. Also, RANSAC is used for robustness and the Levenberg-Marquardt (LM) nonlinear optimization algorithm is used for accuracy. Multiple controlled environment experiments as well as real-world experiments demonstrate the efficiency and accuracy (AED error is 15.31 pixels and Acc up to 89%) of the proposed method.
+<p align="center">
+  <img src="https://github.com/radar-lab/Online-Targetless-Radar-Camera-Extrinsic-Calibration/blob/main/Figures/principle3.png" width="55%">
+</p>
 
+---
 
 ### 🎥 1. Demo video 1
 <a href="https://www.youtube.com/watch?v=_WVRrnrLCVU">
